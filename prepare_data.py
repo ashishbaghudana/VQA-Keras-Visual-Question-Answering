@@ -5,12 +5,14 @@ import h5py
 import os
 from constants import *
 
+
 def right_align(seq,lengths):
     v = np.zeros(np.shape(seq))
     N = np.shape(seq)[1]
     for i in range(np.shape(seq)[0]):
         v[i][N-lengths[i]:N]=seq[i][0:lengths[i]]
     return v
+
 
 def read_data(data_limit):
     print "Reading Data..."
@@ -24,7 +26,7 @@ def read_data(data_limit):
     tem = np.sqrt(np.sum(np.multiply(train_img_data, train_img_data), axis=1))
     train_img_data = np.divide(train_img_data, np.transpose(np.tile(tem,(4096,1))))
 
-    #shifting padding to left side
+    # shifting padding to left side
     ques_train = np.array(ques_data['ques_train'])[:data_limit, :]
     ques_length_train = np.array(ques_data['ques_length_train'])[:data_limit]
     ques_train = right_align(ques_train, ques_length_train)
@@ -32,9 +34,10 @@ def read_data(data_limit):
     train_X = [train_img_data, ques_train]
     # NOTE should've consturcted one-hots using exhausitve list of answers, cause some answers may not be in dataset
     # To temporarily rectify this, all those answer indices is set to 1 in validation set
-    train_y = to_categorical(ques_data['answers'])[:data_limit, :]
+    train_y = np.array(ques_data['answers'][:data_limit, :]).reshape(data_limit)
 
     return train_X, train_y
+
 
 def get_val_data():
     img_data = h5py.File(data_img)
@@ -81,6 +84,7 @@ def get_metadata():
     meta_data = json.load(open(data_prepo_meta, 'r'))
     meta_data['ix_to_word'] = {str(word):int(i) for i,word in meta_data['ix_to_word'].items()}
     return meta_data
+
 
 def prepare_embeddings(num_words, embedding_dim, metadata):
     if os.path.exists(embedding_matrix_filename):
