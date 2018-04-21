@@ -28,16 +28,16 @@ def vqa_model(embedding_matrix, num_words, embedding_dim, seq_length, dropout_ra
     lstm_model = Word2VecModel(embedding_matrix, num_words, embedding_dim, seq_length, dropout_rate)
     print "Merging final model..."
     fc_model = Sequential()
-    fc_model.add(Merge([vgg_model, lstm_model], mode='mul'))
 
     # Our code here
     UNITS = 512
     REGULARIZER = 1e-8
-    LSTM_BLOCKS = 1
+    LSTM_BLOCKS = 2
 
-    lstm_decoder = LSTM(units=UNITS, bias_regularizer=l2(REGULARIZER), recurrent_regularizer=l2(REGULARIZER),
+    lstm_layer = LSTM(units=UNITS, bias_regularizer=l2(REGULARIZER), recurrent_regularizer=l2(REGULARIZER),
                         kernel_regularizer=l2(REGULARIZER), return_sequences=True, name='lstm_decoder')
-    fc_model.add(lstm_decoder(LSTM_BLOCKS))
+    lstm_decoder = lstm_layer(Merge([vgg_model, lstm_model], mode='mul'))
+    fc_model.add(lstm_decoder)
     # End
     # fc_model.add(Dropout(dropout_rate))
     fc_model.add(Dense(1000, activation='softmax'))
